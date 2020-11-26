@@ -1,0 +1,117 @@
+import mazecreator.settings as settings
+from mazecreator.Creator import Creator
+from mazecreator.SquareState import SquareState
+import queue
+
+from collections import defaultdict
+
+
+class DijkstraPathfinder():
+    @staticmethod
+    def find_path():
+        def _get_start_and_end_pos():
+            start_pos, end_pos = None, None
+            for row in grid:
+                for square in row:
+                    if square.state == SquareState.START:
+                        start_pos = square.row, square.col
+                    elif square.state == SquareState.END:
+                        end_pos = square.row, square.col
+
+            return start_pos, end_pos
+
+        def _get_valid_neighbours(r: int, c: int):
+            """
+            Find valid neighbours for a square:
+            valid means it's not a wall, has not been visited
+            :param r: row
+            :param c: column
+            :return: valid neighbours
+            :rtype: list()
+            """
+
+            up_neighbour = (r, c + 1)
+            down_neighbour = (r, c - 1)
+            left_neighbour = (r - 1, c)
+            right_neighbour = (r + 1, c)
+
+            neighbours = [up_neighbour, down_neighbour, left_neighbour, right_neighbour]
+            v_neighbours = list()
+
+            for neighbour in neighbours:
+                r, c = neighbour
+                if r in range(settings.ROWS) and c in range(settings.ROWS):
+                    if grid[r][c].state not in [SquareState.VISITED, SquareState.WALL, SquareState.START]:
+                        v_neighbours.append(neighbour)
+
+            return v_neighbours
+
+        # def _get_neighbour_distance(r: int, c: int):
+        #     for element in pq.queue:
+        #         # print(f'element0 {element[0]}')
+        #         if element[0] == (r, c):
+        #             return element[1]
+
+        # def _reconstruct_path(r, c):
+        #     rr, cc = r, c
+        #     move_made = list()
+        #
+        #     while True:
+        #         try:
+        #             rr, cc = moves[rr][cc].get_pos()
+        #             move_made.append((rr, cc))
+        #         except:
+        #             move_made.reverse()
+        #             return move_made
+
+        grid = Creator.get_grid()
+        q = queue.PriorityQueue()
+        q_set = defaultdict(dict)
+        s = list()
+
+        start_pos, end_pos = _get_start_and_end_pos()
+        print()
+        print(f'Starting position: {start_pos}')
+        print(f'Ending position: {end_pos}')
+        print()
+
+        start_row, start_col = start_pos
+
+        for ir, row in enumerate(grid):
+            for ic, col in enumerate(grid):
+                v = (0, None, (ir, ic)) if (ir, ic) == start_pos else (float('inf'), None, (ir, ic))
+                # dist, prev, pos
+                q.put(v)
+                q_set[ir][ic] = v
+
+        i = 0
+        # print(q.get())
+        while not q.empty():
+            # i += 1
+            # if i > 3:
+            #     break
+            u = q.get()
+            print(u)
+            # line 15
+
+            ur, uc = u[2]
+            if q_set[ur][uc][2] or u[2] == start_pos:
+                while u:
+                    s.append(u)
+                    u = u[1]
+                break
+
+            print(s)
+
+            #
+            # for v in _get_valid_neighbours(*u[2]):
+            #     vr, vc = v
+            #     alt = u[0] + 1
+            #
+            #     if alt < q_set[vr][vc][0]:
+            #         q_set[vr][vc] = (alt, *u[2], q_set[vr][vc][2])
+
+
+
+if __name__ == '__main__':
+    DijkstraPathfinder.find_path()
